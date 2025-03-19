@@ -11,17 +11,28 @@ public class PlayerController : MonoBehaviour
     [Header("Horizontal Movement Settings")]
     [SerializeField] private float walkSpeed = 20;
 
-    [Header("Ground Check Settings")]
+    [Header("Vertical Movement Settings")]
     [SerializeField] private float jumpForce = 45;
+    private int jumpBufferCounter = 0;
+    [SerializeField] private int jumpBufferFrames;
+    private float coyoteTimeCounter = 0;
+    [SerializeField] private float coyoteTime;
+    private int airJumpCounter = 0;
+    [SerializeField] private int maxAirJumps;
+
+    [Header("Ground Check Settings")]   
     [SerializeField] private Transform groundCheckPoint;
     [SerializeField] private float groundCheckX = 0.5f;
     [SerializeField] private float groundCheckY = 0.2f;
     [SerializeField] private LayerMask whatIsGround;
 
 
+    // Variables   
+
     // References
     private Rigidbody2D rb;
     private Animator animator;
+    PlayerStateList playerState;
     private float xAxis;
 
     private void Awake()
@@ -41,6 +52,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        playerState = GetComponent<PlayerStateList>();
     }
 
     // Update is called once per frame
@@ -75,7 +87,7 @@ public class PlayerController : MonoBehaviour
     {
         // Set moving vector
         rb.velocity = new Vector2(walkSpeed * xAxis, rb.velocity.y);
-        // Set direction to player
+        // Set updates, direction to player
         Flip();
         // Set animation 
         animator.SetBool("Walking", rb.velocity.x != 0 && Grounded());
@@ -100,15 +112,60 @@ public class PlayerController : MonoBehaviour
         if(Input.GetButtonDown("Jump") && rb.velocity.y > 0) // is in the air?
         {
             rb.velocity = new Vector2(rb.velocity.x, 0);
+            // Set PlayerStateList script's variable
+            playerState.jumping = false;
         }
 
-        // Simple Jump mechanic
-        if(Input.GetButtonDown("Jump") && Grounded())
+        if (!playerState.jumping) // When not jumping
         {
-            rb.velocity = new Vector3(rb.velocity.x, jumpForce);
+            // Simple Jump mechanic
+            if (jumpBufferCounter > 0 && coyoteTimeCounter > 0)
+            {
+                rb.velocity = new Vector3(rb.velocity.x, jumpForce);
+                // Set PlayerStateList script's variable
+                playerState.jumping = false;
+            }
+            else if (!Grounded() && airJumpCounter < maxAirJumps && Input.GetButtonDown("Jump")) // In the air & have more jump & buttton down
+            {
+                // Set PlayerStateList script's variable
+                playerState.jumping = false;
+
+                airJumpCounter++;
+
+                rb.velocity = new Vector3(rb.velocity.x, jumpForce);
+            }
         }
 
         // Set animation
         animator.SetBool("Jumping", !Grounded());
+
+        // Set updates
+        UpdateJumpingVariables();
+    }
+
+    private void UpdateJumpingVariables()
+    {
+        if (Grounded()) // When player in ground reset variables
+        {
+            // Set PlayerStateList script's variable
+            playerState.jumping = false;
+            coyoteTimeCounter = coyoteTime;
+            // Reset double jump
+            airJumpCounter = 0;
+        }
+        else // When player is int the air
+        {
+            coyoteTimeCounter -= Time.deltaTime;
+        }
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            jumpBufferCounter = jumpBufferFrames;
+        }
+        else
+        {
+            jumpBufferCounter--;
+        }
+
     }
 }
