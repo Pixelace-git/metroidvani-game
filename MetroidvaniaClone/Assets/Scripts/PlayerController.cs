@@ -26,14 +26,22 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float groundCheckY = 0.2f;
     [SerializeField] private LayerMask whatIsGround;
 
+    [Header("Dash Settings")]
+    [SerializeField] private float dashSpeed;
+    [SerializeField] private float dashTime;
+    [SerializeField] private float dashCooldown;
+    [SerializeField] private GameObject dashEffect;
 
     // Variables   
 
     // References
     private Rigidbody2D rb;
     private Animator animator;
-    PlayerStateList playerState;
-    private float xAxis;
+    private PlayerStateList playerState;
+    private float gravity;
+    private float xAxis;   
+    private bool canDash = true;
+    private bool dashed;
 
     private void Awake()
     {
@@ -53,14 +61,17 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         playerState = GetComponent<PlayerStateList>();
+        gravity = rb.gravityScale;
     }
 
     // Update is called once per frame
     private void Update()
     {
         GetInputs();
+        if (playerState.dashing) return;
         Move();
         Jump();
+        StartDash();
     }
 
     private void GetInputs()
@@ -91,6 +102,35 @@ public class PlayerController : MonoBehaviour
         Flip();
         // Set animation 
         animator.SetBool("Walking", rb.velocity.x != 0 && Grounded());
+    }
+
+    private void StartDash()
+    {
+        if(Input.GetButtonDown("Dash") && canDash && !dashed)
+        {
+            StartCoroutine(Dash());
+            dashed = true;
+        }
+
+        if (Grounded())
+        {
+            dashed = false;
+        }
+    }
+
+    private IEnumerator Dash()
+    {
+        canDash = false;
+        playerState.dashing = true;
+        animator.SetTrigger("Dashing");
+        rb.gravityScale = 0;
+        rb.velocity = new Vector2(transform.localScale.x * dashSpeed, 0);
+        if (Grounded()) Instantiate(dashEffect, transform);
+        yield return new WaitForSeconds(dashTime);
+        rb.gravityScale = gravity;
+        playerState.dashing = false;
+        yield return new WaitForSeconds(dashCooldown);
+        canDash = true;
     }
 
     public bool Grounded()

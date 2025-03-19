@@ -266,6 +266,7 @@ GameObject:
   - component: {fileID: 198212758}
   - component: {fileID: 198212759}
   - component: {fileID: 198212760}
+  - component: {fileID: 198212761}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -427,12 +428,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 20
   jumpForce: 30
+  jumpBufferFrames: 8
+  coyoteTime: 0.1
+  maxAirJumps: 1
   groundCheckPoint: {fileID: 1285569117}
   groundCheckX: 0.5
   groundCheckY: 0.2
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
+  dashSpeed: 70
+  dashTime: 0.2
+  dashCooldown: 0.35
+  dashEffect: {fileID: 9095124229884212841, guid: f78bcd792b62c4246a8581210ece41de, type: 3}
 --- !u!95 &198212760
 Animator:
   serializedVersion: 5
@@ -454,6 +462,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &198212761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198212754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32c5227fd7d208146a52890d5282424b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jumping: 0
+  dashing: 0
 --- !u!1 &378211987
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,8 +737,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 761366318}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.3895059, y: -0.061775766, z: -0.038720552}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.3895059, y: -0.061775684, z: -0.038720552}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
