@@ -61,11 +61,13 @@ public class PlayerController : MonoBehaviour
         // Move left
         if (xAxis < 0)
         {
-            transform.localScale = new Vector2(-1, transform.localScale.y);
+            transform.localScale = new Vector2(-Mathf.Abs(transform.localScale.x), transform.localScale.y);
+            // Part 6: transform.eulerAngles = new Vector2(0, 180);
         }
         else if (xAxis > 0) // Move right
         {
-            transform.localScale = new Vector2(1, transform.localScale.y);
+            transform.localScale = new Vector2(Mathf.Abs(transform.localScale.x), transform.localScale.y);
+            // Part 6: transform.eulerAngles = new Vector2(0, 0);
         }
     }
 
