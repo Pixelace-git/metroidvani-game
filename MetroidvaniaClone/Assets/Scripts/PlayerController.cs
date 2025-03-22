@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float damage;
     [SerializeField] private GameObject slashEffect;
     private bool attack = false;
-    private float timeBetweenAttack;
+    [SerializeField] private float timeBetweenAttack;
     private float timeSinceAttack;
 
     [Header("Recoil Settings")]
@@ -217,6 +217,7 @@ public class PlayerController : MonoBehaviour
     private void Hit(Transform _attackTransform, Vector2 _attackArea, ref bool _recoilDir, float _recoilStrength)
     {
         Collider2D[] objectsToHit = Physics2D.OverlapBoxAll(_attackTransform.position, _attackArea, 0, attackableLayer);
+        List<Enemy> hitEnemies = new List<Enemy>();
 
         if(objectsToHit.Length > 0)
         {
@@ -225,9 +226,11 @@ public class PlayerController : MonoBehaviour
 
         for(int i =0; i< objectsToHit.Length; i++)
         {
-            if (objectsToHit[i].GetComponent<Enemy>() != null)
+            Enemy enemy = objectsToHit[i].GetComponent<Enemy>();
+            if (enemy && !hitEnemies.Contains(enemy))
             {
-                objectsToHit[i].GetComponent<Enemy>().EnemyHit(damage, (transform.position - objectsToHit[i].transform.position).normalized, _recoilStrength);
+                enemy.EnemyHit(damage, (transform.position - objectsToHit[i].transform.position).normalized, _recoilStrength);
+                hitEnemies.Add(enemy);
             }
         }
     }

@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 22229893}
   - component: {fileID: 22229892}
   - component: {fileID: 22229891}
-  m_Layer: 3
+  m_Layer: 7
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -246,7 +246,7 @@ Transform:
   m_GameObject: {fileID: 22229890}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -11.889505, y: -2.9382243, z: 0.038720552}
+  m_LocalPosition: {x: -10.5, y: -3, z: 0}
   m_LocalScale: {x: 1, y: 4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -457,6 +457,7 @@ MonoBehaviour:
     m_Bits: 64
   damage: 2
   slashEffect: {fileID: 1953686797869308089, guid: b66ca7f416003e94fa1c8c5dd06f0609, type: 3}
+  timeBetweenAttack: 1
   recoilXStep: 5
   recoilYStep: 5
   recoilXSpeed: 100
@@ -625,7 +626,7 @@ Transform:
   m_GameObject: {fileID: 378211987}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.3895059, y: -4.9382243, z: 0.038720552}
+  m_LocalPosition: {x: 0, y: -5, z: 0}
   m_LocalScale: {x: 1000, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -762,8 +763,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 761366318}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.3895059, y: -0.061775684, z: -0.038720552}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1031,7 +1032,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.33013517, g: 0.5566038, b: 0.07088822, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1050,7 +1051,7 @@ Transform:
   m_GameObject: {fileID: 1731091897}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.5, y: 4, z: 0}
+  m_LocalPosition: {x: 7.5, y: -3, z: 0}
   m_LocalScale: {x: 0.65, y: 1.34, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1068,13 +1069,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a076e3800306c3f48b32a9a49bf70341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 10
+  health: 16
   speed: 3
-  damage: 2
+  damage: 1
   player: {fileID: 0}
   recoilLenght: 2
-  recoilFactor: 10
+  recoilFactor: 5
   isRecoilling: 0
+  wallObjectLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!61 &1731091904
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1244,7 +1248,7 @@ Transform:
   m_GameObject: {fileID: 1979527277}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6104941, y: -0.43822423, z: 0.038720552}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 4, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -8,7 +8,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float health;
     [SerializeField] protected float speed;
     [SerializeField] protected float damage;
-    [SerializeField] protected PlayerController player;
+    [SerializeField] protected LayerMask wallObjectLayer;
 
     [Header("Recoil Settings")]
     [SerializeField] protected float recoilLenght;
@@ -20,6 +20,7 @@ public class Enemy : MonoBehaviour
     // References
     protected Rigidbody2D rb;
     protected float recoilTimer;
+    protected PlayerController player;
 
     protected virtual void Awake()
     {
@@ -53,12 +54,22 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    protected bool IsWalkable(Vector3 _position)
+    {
+        if (Physics2D.OverlapCircle(_position, 0.2f, wallObjectLayer) != null)
+        {
+            return false;
+        }
+        return true;
+    }
+
     public virtual void EnemyHit(float _damageDone, Vector2 _hitDirection, float _hitForce)
     {
         health -= _damageDone;
         if (!isRecoilling)
         {
             rb.AddForce(-_hitForce * recoilFactor * _hitDirection);
+            isRecoilling = true;
         }
     }
 
