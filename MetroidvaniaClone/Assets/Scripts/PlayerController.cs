@@ -10,7 +10,16 @@ public class PlayerController : MonoBehaviour
 
     [Header("Health Settings")]
     [SerializeField] public int maxHealth;
-    public int health;   
+    [SerializeField] private GameObject bloodSpurt;
+    [SerializeField] private float hitFlashSpeed;
+    [SerializeField] private float timeToHeal;
+    public delegate void OnHealthChangedDelegate();
+    [HideInInspector] public OnHealthChangedDelegate onHealthChangedCallback;
+    public int health;
+    private bool healing = false;
+    private bool restoreTime;
+    private float restoreTimeSpeed;
+    private float healTimer;
 
     [Header("Horizontal Movement Settings")]
     [SerializeField] private float walkSpeed = 20;
@@ -65,7 +74,8 @@ public class PlayerController : MonoBehaviour
     [HideInInspector] public PlayerStateList playerState;
 
     private Rigidbody2D rb;
-    private Animator animator;   
+    private Animator animator;
+    private SpriteRenderer sr;
     private float gravity;
     private float xAxis;
     private float yAxis;
@@ -82,15 +92,17 @@ public class PlayerController : MonoBehaviour
         {
             Instance = this;
         }
-        health = maxHealth;
+        Health = maxHealth;
     }
 
     // Start is called before the first frame update
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        sr = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         playerState = GetComponent<PlayerStateList>();
+
         gravity = rb.gravityScale;
     }
 
@@ -107,11 +119,23 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         GetInputs();
+        UpdateJumpingVariables();
+
         if (playerState.dashing) return;
+        RestoreTimeScale();
+        FlashWhileInvincible();
         Move();
+        Heal();
+
+        if (playerState.healing) return;
         Jump();
         StartDash();
-        Attack();
+        Attack();      
+    }
+
+    private void FixedUpdate()
+    {
+        if (playerState.dashing) return;
         Recoil();
     }
 
@@ -119,8 +143,11 @@ public class PlayerController : MonoBehaviour
     {
         xAxis = Input.GetAxisRaw("Horizontal");
         yAxis = Input.GetAxisRaw("Vertical");
-        attack = Input.GetMouseButtonDown(0); // Mouse left click
+        attack = Input.GetButtonDown("Attack"); // Return key or A button
+        healing = Input.GetButtonDown("Healing"); // H or B button
     }
+
+    #region Movements
 
     private void Flip()
     {
@@ -145,6 +172,8 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
+        if (playerState.healing) rb.velocity = new Vector2(0, 0);
+
         // Set moving vector
         rb.velocity = new Vector2(walkSpeed * xAxis, rb.velocity.y);
         // Set updates, direction to player
@@ -182,7 +211,9 @@ public class PlayerController : MonoBehaviour
         canDash = true;
     }
 
-    #region Attack
+    #endregion
+
+    #region Attack Area
 
     private void Attack()
     {
@@ -319,25 +350,101 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamege(float _damage)
     {
-        health -= Mathf.RoundToInt(_damage);
+        Health -= Mathf.RoundToInt(_damage);
         StartCoroutine(StopTakingDamage());
     }
 
     private IEnumerator StopTakingDamage()
     {
         playerState.invincible = true;
-        animator.SetTrigger("TakeDamage");
-        ClampHealth();
+        GameObject _bloodSpurtParticle = Instantiate(bloodSpurt, transform.position, Quaternion.identity);
+        Destroy(_bloodSpurtParticle, 1.5f);
+        animator.SetTrigger("TakeDamage");        
         yield return new WaitForSeconds(1f);
         playerState.invincible = false;
     }
 
-    private void ClampHealth()
+    private void FlashWhileInvincible() 
     {
-        // The health can go beyond the minimum or maximum 
-        health = Mathf.Clamp(health, 0, maxHealth);
+        sr.material.color = playerState.invincible ? Color.Lerp(Color.white, Color.black, Mathf.PingPong(Time.time * hitFlashSpeed, 1.0f)) : Color.white;
     }
 
+    private void RestoreTimeScale()
+    {
+        if (restoreTime)
+        {
+            if (Time.timeScale < 1)
+            {
+                Time.timeScale += Time.unscaledDeltaTime * restoreTimeSpeed;
+            }
+            else 
+            {
+                Time.timeScale = 1;
+                restoreTime = false;
+            }
+        }
+    }
+
+    public void HitStopTime(float _newTimeScale, int _restoreSpeed, float _delay)
+    {
+        restoreTimeSpeed = _restoreSpeed;
+        Time.timeScale = _newTimeScale;
+
+        if(_delay > 0)
+        {
+            StopCoroutine(StartTimeAgain(_delay));
+            StartCoroutine(StartTimeAgain(_delay));
+        }
+        else
+        {
+            restoreTime = true;
+        }
+    }
+
+    IEnumerator StartTimeAgain(float _delay)
+    {       
+        yield return new WaitForSecondsRealtime(_delay);
+        restoreTime = true;
+    }
+
+    public int Health
+    {
+        get { return health; }
+        set
+        {
+            if(health != value)
+            {
+                // The health can go beyond the minimum or maximum 
+                health = Mathf.Clamp(value, 0, maxHealth);
+
+                if(onHealthChangedCallback != null)
+                {
+                    onHealthChangedCallback.Invoke();
+                } 
+            }
+        }
+    }
+
+    private void Heal()
+    {
+        if(healing && (Health < maxHealth) && Grounded() && !playerState.dashing)
+        {
+            playerState.healing = true;
+
+            // healing
+            healTimer += Time.deltaTime;
+            if (healTimer >= timeToHeal)
+            {
+                Health++;
+                healTimer = 0;
+            }
+        }
+        else
+        {
+            playerState.healing = false;
+            healTimer = 0;
+        }
+    }
 
     public bool Grounded()
     {
